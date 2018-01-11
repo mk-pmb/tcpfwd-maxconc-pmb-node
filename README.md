@@ -36,13 +36,13 @@ Available options:
 * `max_conc` (typo fallback: `max_conn`):
   Up to how many connections the target
   shall be bothered with at the same time.
-* `tgt_host` or `tgt_name`: Where to connect (target).
+* `tgt_host` or `tgt_addr`: Where to connect (target).
   * Currently defaults to `localhost`, but might change to an attempt
     at guessing your HTTP(S) proxy hostname.
   * Can also be a unix domain socket path.
 * `tgt_port`: In case the target looks like TCP, this is the port.
   If empty or zero, tries to guess your HTTP(S) proxy's port and use that.
-* `lsn_addr`: Like `tgt_name` but for where the proxy itself shall listen.
+* `lsn_addr`: Like `tgt_addr` but for where the proxy itself shall listen.
   * Can be anything supported by [net-smartlisten-pmb][npm-smartlisten],
     e.g. a unix domain socket path or `systemd:`.
 * `lsn_port`: In case `lsn_addr` looks like TCP, this is the port.

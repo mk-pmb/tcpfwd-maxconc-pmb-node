@@ -13,15 +13,11 @@ var srv, net = require('net'),
   sockAddrStr = require('sockaddrstr'),
   smartListen = require('net-smartlisten-pmb'),
   connIdCounter = require('maxuniqid')(),
-  consts = { secondsPerMinute: 60 },
-  tgtConnect;
-
-function connectTCP() { return net.connect(cfg.tgtPort, cfg.tgtName); }
-function connectUDS() { return net.connect(cfg.tgtName); }
+  consts = { secondsPerMinute: 60 };
 
 
 (function configure() {
-  cfg.tgtName = (cfg('tgt_host') || cfg('tgt_name') || 'localhost');
+  cfg.tgtAddr = (cfg('tgt_host') || cfg('tgt_addr') || 'localhost');
   var tgtPort = (+cfg('tgt_port')
     || cfg.guessProxyPort('https')
     || cfg.guessProxyPort('http')
@@ -35,12 +31,10 @@ function connectUDS() { return net.connect(cfg.tgtName); }
   cfg.verbosity = (+cfg('debuglevel') || +cfg('loglv') || 0);
   cfg.idleQuit = (+cfg('idle_quit') || 0);   // minutes
 
-  tgtConnect = connectTCP;
-  if (cfg.tgtName.substr(0, 1) === '/') { tgtConnect = connectUDS; }
-
-  cfg.tgtDescrArrow = ('--{maxConc=' + cfg.maxConn + '}--> ' +
-    cfg.tgtName + ':' + cfg.tgtPort);
-  cfg.lsnSpec = smartListen({ addr: cfg('lsn_addr'), port: cfg.lsnPort });
+  cfg.lsnSpec = smartListen({ addr: cfg('lsn_addr'),  port: cfg.lsnPort });
+  cfg.tgtSpec = smartListen({ addr: cfg.tgtAddr,      port: cfg.tgtPort });
+  cfg.tgtDescrArrow = ('--{maxConc=' + cfg.maxConn + '}--> '
+    + String(cfg.tgtSpec));
 }());
 
 
@@ -106,8 +100,8 @@ function checkSeatAvail() {
   srv.seatsAvail -= 1;
   delete q[lucky.id];
   lucky.lostEarly = false;
-  clog.misc(logPfx + 'connecting.', srv.qStats());
-  fwd = tgtConnect();
+  clog.misc(logPfx + 'connecting to target.', srv.qStats());
+  fwd = net.connect(cfg.tgtSpec);
 
   function burnBridge() {
     try { fwd.end(); } catch (ignore) {}
@@ -119,15 +113,15 @@ function checkSeatAvail() {
   fwd.on('error', burnBridge);
   lucky.on('close', burnBridge);
   lucky.on('error', burnBridge);
+  lucky.pipe(fwd).pipe(lucky);
   fwd.on('connect', function () {
-    clog.misc(logPfx + 'plumbing the pipes.');
-    lucky.pipe(fwd).pipe(lucky);
+    clog.misc(logPfx + 'connection established.');
+    lucky.resume();
   });
   if (cfg.verbosity >= 8) {
     lucky.on('data', clog(0, [logPfx + '>> n_bytes ='], lenProp));
     fwd.on('data', clog(0, [logPfx + '<< n_bytes ='], lenProp));
   }
-  lucky.resume();
   soonOnce(checkSeatAvail);
 }
 
