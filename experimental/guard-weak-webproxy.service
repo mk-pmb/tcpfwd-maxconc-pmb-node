@@ -1,0 +1,26 @@
+# -*- coding: utf-8, tab-width: 2 -*-
+#
+# systemd manifest to put
+# in $XDG_CONFIG_HOME/systemd/user/
+# or $HOME/.config/systemd/user/
+# or $HOME/.local/share/systemd/user/
+
+
+[Unit]
+Description=Guard weak webproxy
+
+[Service]
+WorkingDirectory=/
+ExecStart=/usr/bin/nodejs -r tcpfwd-maxconc-pmb -e 0
+
+Environment=LOGLV=-1
+Environment=MAX_CONC=5
+Environment=LSN_HOST=systemd: IDLE_QUIT=5
+Environment=TGT_HOST=localhost TGT_HOST=8118
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=guard-weak-webproxy
+
+[Install]
+# WantedBy=multi-user.target
