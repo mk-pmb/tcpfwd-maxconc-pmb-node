@@ -39,11 +39,12 @@ Available options:
 * `tgt_host` or `tgt_name`: Where to connect (target).
   * Currently defaults to `localhost`, but might change to an attempt
     at guessing your HTTP(S) proxy hostname.
-  * Can also be anything supported by [net-smartlisten-pmb][npm-smartlisten],
-    e.g. a unix domain socket path or `systemd:`.
+  * Can also be a unix domain socket path.
 * `tgt_port`: In case the target looks like TCP, this is the port.
   If empty or zero, tries to guess your HTTP(S) proxy's port and use that.
 * `lsn_addr`: Like `tgt_name` but for where the proxy itself shall listen.
+  * Can be anything supported by [net-smartlisten-pmb][npm-smartlisten],
+    e.g. a unix domain socket path or `systemd:`.
 * `lsn_port`: In case `lsn_addr` looks like TCP, this is the port.
   If empty or zero, a port is chosen based on `tgt_port` and some offset
   to ensure its above 1024.
