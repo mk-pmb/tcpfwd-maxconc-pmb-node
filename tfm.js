@@ -4,7 +4,7 @@
 
 require('autoquit');
 
-var srv, net = require('net'),
+var srv, net = require('net'), clog = require('./log-util')(),
   arSlc = Array.prototype.slice,
   cliArgs = process.argv.slice(1),
     // ^-- start at arg 1 to allow -r -e hack:
@@ -13,11 +13,15 @@ var srv, net = require('net'),
   sockAddrStr = require('sockaddrstr'),
   smartListen = require('net-smartlisten-pmb'),
   connIdCounter = require('maxuniqid')(),
-  consts = { secondsPerMinute: 60 };
+  consts = { secondsPerMinute: 60, millisecPerSecond: 1e3,
+    dropoutEvents: ['close', 'error', 'end'],
+    goodbyeEvents: ['close', 'error', 'timeout'], // end: .pipe will care
+    };
 
 
 (function configure() {
   cfg.tgtAddr = (cfg('tgt_host') || cfg('tgt_addr') || 'localhost');
+  cfg.tgtIdleSec = (+cfg('tgt_idle') || 0);
   var tgtPort = (+cfg('tgt_port')
     || cfg.guessProxyPort('https')
     || cfg.guessProxyPort('http')
@@ -29,7 +33,7 @@ var srv, net = require('net'),
     || 8280);
   cfg.maxConn = (+cfg('max_conn') || +cfg('max_conc') || 1);
   cfg.verbosity = (+cfg('debuglevel') || +cfg('loglv') || 0);
-  cfg.idleQuit = (+cfg('idle_quit') || 0);   // minutes
+  cfg.idleQuitMin = (+cfg('idle_quit') || 0);    // minutes
 
   cfg.lsnSpec = smartListen({ addr: cfg('lsn_addr'),  port: cfg.lsnPort });
   cfg.tgtSpec = smartListen({ addr: cfg.tgtAddr,      port: cfg.tgtPort });
@@ -38,22 +42,11 @@ var srv, net = require('net'),
 }());
 
 
-function identity(x) { return x; }
-function lenProp(x) { return (x || false).length; }
-
-function clog(lvl, pre, conv) {
-  if (lvl > cfg.verbosity) { return identity; }
-  pre = ['<date>'].concat(pre || []);
-  return function () {
-    pre[0] = (new Date()).toLocaleTimeString();
-    var msg = arSlc.call(arguments);
-    if (conv) { msg = msg.map(conv); }
-    console.log.apply(console, pre.concat(msg));
-  };
+function handleEvents(ee, names, hnd) {
+  names.forEach(function (n) { ee.on(n, hnd.bind(ee, n)); });
 }
-clog.misc = clog(0);
 
-
+function lenProp(x) { return (x || false).length; }
 
 srv = net.createServer({ pauseOnConnect: true });
 srv.seatsAvail = cfg.maxConn;
@@ -64,14 +57,21 @@ srv.qStats = function () {
 };
 
 
-if (cfg.idleQuit) {
-  clog.misc('Will idle-quit after', cfg.idleQuit, 'minutes of inactivity.');
+if (cfg.tgtIdleSec > 0) {
+  clog.misc('Target connections are reclaimed after', cfg.tgtIdleSec,
+    'seconds of idleness.');
+} else {
+  clog.misc('Target connections are allowed to idle forever.');
+}
+
+if (cfg.idleQuitMin) {
+  clog.misc('Will idle-quit after', cfg.idleQuitMin, 'minutes of inactivity.');
   srv.getBored = function () {
     clog.misc('Gonna idle-quit.');
     srv.close();
   };
   srv.autoQuit({ exitFn: srv.getBored,
-    timeOut: cfg.idleQuit * consts.secondsPerMinute });
+    timeOut: cfg.idleQuitMin * consts.secondsPerMinute });
 }
 
 
@@ -99,20 +99,23 @@ function checkSeatAvail() {
   }
   srv.seatsAvail -= 1;
   delete q[lucky.id];
-  lucky.lostEarly = false;
   clog.misc(logPfx + 'connecting to target.', srv.qStats());
   fwd = net.connect(cfg.tgtSpec);
+  fwd.on('close', releaseSeat);
+  if (cfg.tgtIdleSec > 0) {
+    fwd.setTimeout(cfg.tgtIdleSec * consts.millisecPerSecond);
+  }
 
-  function burnBridge() {
+  function burnBridge(evName) {
+    var evArgs = arSlc.call(arguments, 1),
+      side = (this === lucky ? 'seat' : 'target');
+    clog.misc(logPfx + side + ' ' + evName + '!', evArgs);
     try { fwd.end(); } catch (ignore) {}
     try { lucky.end(); } catch (ignore) {}
   }
 
-  fwd.on('close', releaseSeat);
-  fwd.on('close', burnBridge);
-  fwd.on('error', burnBridge);
-  lucky.on('close', burnBridge);
-  lucky.on('error', burnBridge);
+  handleEvents(lucky, consts.goodbyeEvents, burnBridge);
+  handleEvents(fwd,   consts.goodbyeEvents, burnBridge);
   lucky.pipe(fwd).pipe(lucky);
   fwd.on('connect', function () {
     clog.misc(logPfx + 'connection established.');
@@ -131,12 +134,13 @@ srv.on('connection', function (conn) {
   conn.id = connId;
   conn.logPfx = logPfx;
   srv.guestsWaiting[connId] = conn;
-  conn.lostEarly = function () {
-    if (!conn.lostEarly) { return; }
-    clog.misc(logPfx + 'disappeared from queue.', srv.qStats());
+  function lostEarly(evName) {
+    if (srv.guestsWaiting[connId] !== conn) { return; }   // no longer in Q
     delete srv.guestsWaiting[connId];
-  };
-  conn.on('close', conn.lostEarly);
+    var evArgs = arSlc.call(arguments, 1);
+    clog.misc(logPfx + 'queue ' + evName + '!', evArgs, srv.qStats());
+  }
+  handleEvents(conn, consts.dropoutEvents, lostEarly);
   clog.misc(logPfx + sockAddrStr(conn) + ' enqueued.', srv.qStats());
   soonOnce(checkSeatAvail);
 });

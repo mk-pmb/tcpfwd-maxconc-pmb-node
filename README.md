@@ -53,8 +53,17 @@ Available options:
 * `idle_quit`: Close the server after this many minutes(!) without activity.
   * __BUG:__ [Not yet reliable][autoquit-bug-4] at time of this writing,
     but I hope newer versions of `autoquit` will support it.
+* `tgt_idle`: If set to a positive number, target connections are reclaimed
+  after `tgt_idle` seconds without data transfer.
+  Default: 0 = Target is allowed to idle forever.
 
 
+
+!!! Recommended options
+
+* To guard your proxy from
+  [npm bug 18903](https://github.com/npm/npm/issues/18903):
+  `max_conc=25 tgt_idle=5`
 
 
 
