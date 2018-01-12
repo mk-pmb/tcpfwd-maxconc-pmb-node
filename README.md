@@ -16,10 +16,10 @@ Usage
 
 ```bash
 $ echo $https_proxy
-http://hostname.currently.ignored:8118/
+http://hostname.currently.ignored:3128/
 $ nodejs -r tcpfwd-maxconc-pmb -e 0 -- max_conc=5
-17:12:16 Gonna listen on TCP localhost:8119 --{maxConc=5}--> localhost:8118
-17:12:16 Listening. 127.0.0.1:8119 --{maxConc=5}--> localhost:8118
+17:12:16 Gonna listen on TCP localhost:3129 --{maxConc=5}--> localhost:3128
+17:12:16 Listening. 127.0.0.1:3129 --{maxConc=5}--> localhost:3128
 ```
 
 
@@ -59,7 +59,8 @@ Available options:
 
 
 
-!!! Recommended options
+Recommended options
+-------------------
 
 * To guard your proxy from
   [npm bug 18903](https://github.com/npm/npm/issues/18903):
