@@ -1,6 +1,8 @@
 # -*- coding: utf-8, tab-width: 2 -*-
 #
 # If you're new to xinetd, see https://github.com/mk-pmb/inetd-util-pmb-node
+#
+# This is an example config. Review and adapt it before use.
 
 service npm_proxy_guard
 {
