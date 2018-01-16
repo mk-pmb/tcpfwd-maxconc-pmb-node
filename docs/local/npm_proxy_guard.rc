@@ -1,0 +1,10 @@
+# -*- coding: utf-8, tab-width: 2 -*-
+#
+# Copy this file to /etc/nodejs/npm_proxy_guard.rc to override settings
+# from the xinetd service manifest, in case you prefer to not edit the
+# latter one directly.
+
+export LANG=en_US.UTF-8
+export TGT_PORT=8118
+# export TGT_IDLE=30    # increase transfer timeout for slow peers
+export LOGLV=8

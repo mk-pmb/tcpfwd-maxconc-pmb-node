@@ -5,22 +5,25 @@
 # or $HOME/.config/systemd/user/
 # or $HOME/.local/share/systemd/user/
 
-
 [Unit]
-Description=Guard weak webproxy
+Description=Concurrency-limited proxy for npm
 
 [Service]
 WorkingDirectory=/
 ExecStart=/usr/bin/nodejs -r tcpfwd-maxconc-pmb -e 0
+Nice=10
+
+PassEnvironment=http_proxy
+PassEnvironment=HTTP_PROXY
+PassEnvironment=https_proxy
+PassEnvironment=HTTPS_PROXY
 
 Environment=LOGLV=-1
-Environment=MAX_CONC=5
+Environment=MAX_CONC=15 TGT_IDLE=5
+Environment=IDLE_QUIT=5
 Environment=LSN_HOST=systemd: IDLE_QUIT=5
-Environment=TGT_HOST=localhost TGT_HOST=8118
+# Environment=TGT_HOST=localhost TGT_HOST=8118
 
-StandardOutput=syslog
-StandardError=syslog
-SyslogIdentifier=guard-weak-webproxy
+StandardInput=null
+SyslogIdentifier=npm-proxy-guard
 
-[Install]
-# WantedBy=multi-user.target

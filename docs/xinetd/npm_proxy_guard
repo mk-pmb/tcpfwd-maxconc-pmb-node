@@ -1,0 +1,55 @@
+# -*- coding: utf-8, tab-width: 2 -*-
+#
+# If you're new to xinetd, see https://github.com/mk-pmb/inetd-util-pmb-node
+
+service npm_proxy_guard
+{
+  socket_type = stream
+  protocol = tcp
+  type = UNLISTED
+  interface = 127.0.0.1
+  port = 13604
+  # ^-- iana_reg_port_max = 49151
+  #     port = parseInt("npmproxyguard", 36) % iana_reg_port_max
+  user = proxy
+  group = proxy
+
+  wait = yes
+  server = /usr/lib/node_modules/inetd-util-pmb/bin/logwrap.sh
+
+  instances = 1
+  # ^-- run at most one (should be redundant since we have wait=yes)
+  nice = 10
+  # ^-- run with low priority
+  # rlimit_as = 256M
+  # ^-- should be enough RAM for a simple proxy.
+
+  # Slow down the syslog flood even more in case nodejs failed:
+  env += LW_FAIL_WAIT=10s
+
+  # Set up our usual NODE_PATH:
+  env += LW_SOURCE_INIT=/etc/profile
+  env += LW_SOURCE_LATE=?/etc/nodejs/npm_proxy_guard.rc:?local/npm_proxy_guard.rc
+
+  env += LW_DUMPENV=/tmp/npm_proxy_guard.log
+  env += LW_STDOUT=.
+  env += LW_STDERR=/tmp/npm_proxy_guard.log
+  # env += LW_BASH_REPL=/tmp/xinetd_debug_repl
+
+  env += LW_CWD_RESOLVE=tcpfwd-maxconc-pmb
+  env += LW_SCRIPT=tfm.js
+
+  env += LOGLV=-1
+  env += LSN_ADDR=fd:0
+  env += TGT_HOST=localhost
+  env += TGT_PORT=3128
+  env += MAX_CONC=15
+  env += TGT_IDLE=5
+  env += IDLE_QUIT=5
+  env += KILLWORD=stop
+
+
+
+
+
+}

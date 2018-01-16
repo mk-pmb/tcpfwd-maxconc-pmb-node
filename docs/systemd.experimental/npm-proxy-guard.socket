@@ -1,0 +1,17 @@
+# -*- coding: utf-8, tab-width: 2 -*-
+
+[Socket]
+ListenStream=127.0.0.1:8117
+FreeBind=true
+# ^-- Don't mind whether our network interface is ready.
+#     When something connects, we don't care about how or why.
+
+Accept=no
+# ^-- We want the server socket, not individual client connections.
+
+ReusePort=true
+# ^-- Seamless hand-over between systemd and manually started instance.
+
+
+[Install]
+WantedBy=multi-user.target

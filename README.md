@@ -66,7 +66,7 @@ Recommended options
   [npm bug 18903](https://github.com/npm/npm/issues/18903):
   `max_conc=25 tgt_idle=5`
 * If you're going to use
-  [xinetd socket activation](docs/etc/xinetd/npm-proxy-guard)
+  [xinetd socket activation](docs/xinetd/npm_proxy_guard)
   you'll need `lsn_addr=fd:0`
 
 
