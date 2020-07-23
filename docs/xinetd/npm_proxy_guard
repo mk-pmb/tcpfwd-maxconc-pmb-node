@@ -23,7 +23,7 @@ service npm_proxy_guard
   # ^-- run at most one (should be redundant since we have wait=yes)
   nice = 10
   # ^-- run with low priority
-  # rlimit_as = 256M
+  rlimit_as = 256M
   # ^-- should be enough RAM for a simple proxy.
 
   # Slow down the syslog flood even more in case nodejs failed:
