@@ -33,7 +33,7 @@ service npm_proxy_guard
   env += LW_SOURCE_INIT=/etc/profile
   env += LW_SOURCE_LATE=?/etc/nodejs/npm_proxy_guard.rc:?local/npm_proxy_guard.rc
 
-  env += LW_DUMPENV=/tmp/npm_proxy_guard.log
+  env += LW_DUMPENV=/tmp/npm_proxy_guard.dump
   env += LW_STDOUT=.
   env += LW_STDERR=/tmp/npm_proxy_guard.log
   # env += LW_BASH_REPL=/tmp/xinetd_debug_repl
