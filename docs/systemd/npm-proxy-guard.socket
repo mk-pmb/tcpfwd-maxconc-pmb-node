@@ -1,17 +1,22 @@
 # -*- coding: utf-8, tab-width: 2 -*-
+#
+# Default config. Don't modify config here! Instead, override
+# relevant settings using a systemd drop-in file, e.g.
+# /etc/systemd/system/npm-proxy-guard.socket.d/local.conf
 
 [Socket]
-ListenStream=127.0.0.1:8117
+ListenStream = 127.0.0.1:13604
+
 FreeBind=true
 # ^-- Don't mind whether our network interface is ready.
 #     When something connects, we don't care about how or why.
 
-Accept=no
+Accept = no
 # ^-- We want the server socket, not individual client connections.
 
-ReusePort=true
+ReusePort = true
 # ^-- Seamless hand-over between systemd and manually started instance.
 
 
 [Install]
-WantedBy=multi-user.target
+WantedBy = multi-user.target

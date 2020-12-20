@@ -1,0 +1,32 @@
+# -*- coding: utf-8, tab-width: 2 -*-
+#
+# Default config. Don't modify config here! Instead, override
+# relevant settings using a systemd drop-in file, e.g.
+# /etc/systemd/system/npm-proxy-guard.service.d/local.conf
+
+[Unit]
+Description = Concurrency-limited proxy for npm
+
+[Service]
+User  = proxy
+Group = proxy
+WorkingDirectory = /
+ExecStart = bash -c 'source -- /etc/profile && exec -a npm-proxy-guard nodejs -r tcpfwd-maxconc-pmb -e 0'
+Nice = 10
+
+PassEnvironment = http_proxy
+PassEnvironment = HTTP_PROXY
+PassEnvironment = https_proxy
+PassEnvironment = HTTPS_PROXY
+
+# Don't modify config here (see above).
+Environment = LOGLV=0
+Environment = MAX_CONC=15 TGT_IDLE=5
+Environment = LSN_ADDR=systemd: IDLE_QUIT=5
+
+StandardInput = socket
+StandardOutput = journal
+SyslogIdentifier = npm-proxy-guard
+
+# man 5 systemd.exec: stderr "inherit" means send to stdout:
+StandardError = inherit
