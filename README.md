@@ -56,6 +56,10 @@ Available options:
 * `tgt_idle`: If set to a positive number, target connections are reclaimed
   after `tgt_idle` seconds without data transfer.
   Default: 0 = Target is allowed to idle forever.
+* `peek_data`: Once a connection is forwarded, dump up to this many bytes
+  from each participant's initial message chunk.
+  This can be useful to debug what's being requested from an upstream proxy.
+  Default: 0 = Don't dump traffic.
 
 
 
