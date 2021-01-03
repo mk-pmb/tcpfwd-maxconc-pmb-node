@@ -1,5 +1,5 @@
 { "name": "tcpfwd-maxconc-pmb",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "Transparently proxy TCP connections ('forward' their data), with a limit on the total number of concurrent connections (maxconn, maxsockets). Might help guard your proxy from overly aggressive programs.",
   "keywords": [],
 
@@ -31,6 +31,8 @@
     "usnam-pmb": "^0.2.5"
   },
   "devDependencies": {
+    "esbrowserify-pmb": "^0.1.0",
+    "p-fatal": "^0.1.3"
   },
 
 
