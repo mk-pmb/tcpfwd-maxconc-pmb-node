@@ -11,22 +11,27 @@ Description = Concurrency-limited proxy for npm
 User  = proxy
 Group = proxy
 WorkingDirectory = /
-ExecStart = bash -c 'source -- /etc/profile && exec -a npm-proxy-guard nodejs -r tcpfwd-maxconc-pmb -e 0'
+ExecStart = bash -c 'source -- /etc/profile && exec -a %N nodejs -r tcpfwd-maxconc-pmb -e 0'
 Nice = 10
-
-PassEnvironment = http_proxy
-PassEnvironment = HTTP_PROXY
-PassEnvironment = https_proxy
-PassEnvironment = HTTPS_PROXY
+Restart = no
 
 # Don't modify config here (see above).
 Environment = LOGLV=0
 Environment = MAX_CONC=15 TGT_IDLE=5
 Environment = LSN_ADDR=systemd: IDLE_QUIT=5
 
+# In your drop-in file (see above) you'd define either
+# Environment = TGT_HOST=localhost TGT_PORT=3128
+# or
+# Environment = http_proxy=http://localhost:3128/
+# or (more commonly) you set http_proxy in /etc/profile.d/*.
+
 StandardInput = socket
 StandardOutput = journal
-SyslogIdentifier = npm-proxy-guard
+SyslogIdentifier = %N
 
 # man 5 systemd.exec: stderr "inherit" means send to stdout:
 StandardError = inherit
+
+ProtectSystem = strict
+PrivateDevices = true

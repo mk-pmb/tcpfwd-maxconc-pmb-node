@@ -31,7 +31,7 @@
     "usnam-pmb": "^0.2.5"
   },
   "devDependencies": {
-    "esbrowserify-pmb": "^0.1.0",
+    "esbrowserify-pmb": "^0.1.1",
     "p-fatal": "^0.1.3"
   },
 

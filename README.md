@@ -29,7 +29,7 @@ Options
 Options can be given via
 * CLI with dashes, e.g. `--max-conc=5`
 * CLI with underscores, e.g. `max_conc=5`
-* environment variables, e.g. `MAX_CONC=5`
+* all-uppercase environment variables, e.g. `MAX_CONC=5`
 * additional undocumented methods that you shouldn't rely on.
 
 Available options:
