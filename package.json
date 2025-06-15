@@ -1,5 +1,5 @@
 { "name": "tcpfwd-maxconc-pmb",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Transparently proxy TCP connections ('forward' their data), with a limit on the total number of concurrent connections (maxconn, maxsockets). Might help guard your proxy from overly aggressive programs.",
   "keywords": [],
 
@@ -17,8 +17,9 @@
   "private": false, "license": "ISC",
 
   "main": "tfm.js",
-  "scripts": { "test": "nodejs test/all.js" },
+  "scripts": { "test": "elp && nodejs test/all.js" },
   "directories": { "test": "test" },
+  "eslintConfig": { "extends": "nodejs-pmb" },
 
   "dependencies": {
     "autoquit": "^0.1.6",
@@ -31,9 +32,13 @@
     "usnam-pmb": "^0.2.5"
   },
   "devDependencies": {
-    "esbrowserify-pmb": "^0.1.2"
+    "esbrowserify-pmb": "^0.1.2",
+    "eslint-config-nodejs-pmb": "^0.3.8",
+    "eslint-plugin-json-light-pmb": "^1.0.7",
+    "eslint-plugin-n": "^17.16.2",
+    "eslint-pretty-pmb": "^1.0.7"
   },
 
 
-  "npm vs. BOM = Unexpected token": "-*- coding: UTF-8 -*-"
+  "engines": { "npm": ">=7.0.0", "node": ">=16.0.0" }
 }

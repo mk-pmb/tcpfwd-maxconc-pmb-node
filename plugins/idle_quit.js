@@ -1,11 +1,11 @@
-﻿/*jslint indent: 2, maxlen: 80, continue: false, unparam: false, node: true */
-/* -*- tab-width: 2 -*- */
+﻿/* -*- tab-width: 2 -*- */
 'use strict';
 
 require('autoquit');
 
 function install(srv, cfg) {
-  var idleQuitMin = (+cfg('idle_quit') || 0), secondsPerMinute = 60;
+  const idleQuitMin = (+cfg('idle_quit') || 0); const
+    secondsPerMinute = 60;
   if (idleQuitMin <= 0) { return; }
 
   srv.log.misc('Will idle-quit after', idleQuitMin, 'minutes of inactivity.');
