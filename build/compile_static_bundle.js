@@ -1,2 +1,2 @@
 ﻿'use strict';
-require('esbrowserify-pmb').simpleFromManifest(require);
+require('esbrowserify-pmb/fx/simpleFromManifest.js')(require);
